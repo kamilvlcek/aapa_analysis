@@ -1,9 +1,11 @@
-function data = aapa_analysis_folder()
-clear all
+function data = aapa_analysis_folder(folder)
+%clear all - to je zbytecne, + nechci mazat folder - Kamil
 
-% get folder name with input data files
-folder_input = uigetdir;
-folder = strcat(folder_input, '\');
+if ~exist('folder','var') %pokud uz nemam folder - Kamil
+    % get folder name with input data files
+    folder_input = uigetdir;
+    folder = strcat(folder_input, '\');
+end
 
 % list .tr files from input directory
 files = dir(fullfile(folder, '*.tr'));
@@ -15,6 +17,7 @@ data = {'filename ', 'distance f1 ', 'f2 ', 'f3 ', 'entrances f1 ', 'f2 ', 'f3 '
 
 % process data files
 for i = 1:length(files)
+    fprintf('%s ... ', files(i).name); %pro vice souboru je trosku videt, v jake fazi zpracovani to je - Kamil
     file_name = strcat(folder, files(i).name);
     analysis_output = analysis(file_name);
     
@@ -23,9 +26,9 @@ for i = 1:length(files)
         data{i+1,1} = files(i).name;
         data{i+1,j+1} = analysis_output(j);
     end
-    
+    fprintf(' ... OK \n');
 end
 
 disp('analysis done');
-
+data = data'; %ve sloupcich je to trosku prehlednejsi - Kamil
 end
