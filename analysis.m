@@ -1,5 +1,9 @@
-function analysis(file)
+function output_an = analysis(file)
 
+%DEFINE EXP TIMES
+f1 = 180; %180
+f3 = 360; %360
+exp_end = 540; %540
 
 %GET FILE NAME
 file_name_full = file;
@@ -8,9 +12,9 @@ file_name_full = file;
 
 %DEFINE FORBIDDEN SECTORS
 sector_1_x = [-1, -531, -17, 538];
-sector_1_y = [-179, -712, -1221, -721];
+sector_1_y = [179, 712, 1221, 721];
 sector_2_x = [0, 535, -6, -544];
-sector_2_y = [180, 718, 1248, 719];
+sector_2_y = [-180, -718, -1248, -719];
 
 
 
@@ -47,11 +51,12 @@ while read_file == 1
         time_num = str2double(line_str(2));
         
         %phase 1
-        if time_num < 180
+        if time_num < f1
             time_f1(i) = time_num;
             frame_f1(i) = str2double(line_str(3));
             room_f1(i,1) = str2double(line_str(4));
-            room_f1(i,2) = str2double(line_str(5));  
+            room_f1_temp = str2double(line_str(5));
+            room_f1(i,2) = room_f1_temp*-1;  
             angle_f1(i) = str2double(line_str(6));
             view_f1(i) = str2double(line_str(9));
             
@@ -64,17 +69,17 @@ while read_file == 1
             [view_arena_f1(i,1), view_arena_f1(i,2)]  = angle2point(arena_f1(i,1),...
                 arena_f1(i,2), view_len, view_int_f1(i));
            
-            %diamant data
-            if count_diamant == 1 
-                diam_time_f1(i_diam) = time_f1(i-1);
-                diam_room_f1(i_diam,1) = room_f1(i-1,1);
-                diam_room_f1(i_diam,2) = room_f1(i-1,2);
-                diam_arena_f1(i_diam,1) = arena_f1(i-1,1);
-                diam_arena_f1(i_diam,2) = arena_f1(i-1,2);
-                diam_ent_f1 = diam_ent_f1 + 1;
-                i_diam = i_diam + 1;
-                count_diamant = 0;
-            end
+%             %diamant data
+%             if count_diamant == 1 
+%                 diam_time_f1(i_diam) = time_f1(i-1);
+%                 diam_room_f1(i_diam,1) = room_f1(i-1,1);
+%                 diam_room_f1(i_diam,2) = room_f1(i-1,2);
+%                 diam_arena_f1(i_diam,1) = arena_f1(i-1,1);
+%                 diam_arena_f1(i_diam,2) = arena_f1(i-1,2);
+%                 diam_ent_f1 = diam_ent_f1 + 1;
+%                 i_diam = i_diam + 1;
+%                 count_diamant = 0;
+%             end
             
             %unreal data
             if unreal_entrance == 1
@@ -89,12 +94,14 @@ while read_file == 1
             i = i + 1;
         
         %phase2
-        elseif time_num >= 180 & time_num < 360
+        elseif time_num >= f1 & time_num < f3
             
             time_f2(j) = time_num;
             frame_f2(j) = str2double(line_str(3));
             room_f2(j,1) = str2double(line_str(4));
-            room_f2(j,2) = str2double(line_str(5));  
+            room_f2_temp = str2double(line_str(5));
+            room_f2(j,2) = room_f2_temp*-1;  
+            
             angle_f2(j) = str2double(line_str(6));
             view_f2(j) = str2double(line_str(9));
             
@@ -107,17 +114,17 @@ while read_file == 1
             [view_arena_f2(j,1), view_arena_f2(j,2)]  = angle2point(arena_f2(j,1),...
                 arena_f2(j,2), view_len, view_int_f2(j));
            
-            %diamant data
-            if count_diamant == 1
-                diam_time_f2(j_diam) = time_f2(j-1);
-                diam_room_f2(j_diam,1) = room_f2(j-1,1);
-                diam_room_f2(j_diam,2) = room_f2(j-1,2);
-                diam_arena_f2(j_diam,1) = arena_f2(j-1,1);
-                diam_arena_f2(j_diam,2) = arena_f2(j-1,2);
-                diam_ent_f2 = diam_ent_f2 + 1;
-                j_diam = j_diam + 1;
-                count_diamant = 0;
-            end
+%             %diamant data
+%             if count_diamant == 1
+%                 diam_time_f2(j_diam) = time_f2(j-1);
+%                 diam_room_f2(j_diam,1) = room_f2(j-1,1);
+%                 diam_room_f2(j_diam,2) = room_f2(j-1,2);
+%                 diam_arena_f2(j_diam,1) = arena_f2(j-1,1);
+%                 diam_arena_f2(j_diam,2) = arena_f2(j-1,2);
+%                 diam_ent_f2 = diam_ent_f2 + 1;
+%                 j_diam = j_diam + 1;
+%                 count_diamant = 0;
+%             end
             
             %unreal data
             if unreal_entrance == 1
@@ -132,11 +139,12 @@ while read_file == 1
             j = j + 1;
         
         %phase 3
-        elseif time_num >= 360
+        elseif time_num >= f3 & time_num <= exp_end
             time_f3(k) = time_num;
             frame_f3(k) = str2double(line_str(3));
             room_f3(k,1) = str2double(line_str(4));
-            room_f3(k,2) = str2double(line_str(5));  
+            room_f3_temp = str2double(line_str(5));
+            room_f3(k,2) = room_f3_temp * -1;
             angle_f3(k) = str2double(line_str(6));
             view_f3(k) = str2double(line_str(9));
             
@@ -149,24 +157,18 @@ while read_file == 1
             [view_arena_f3(k,1), view_arena_f3(k,2)]  = angle2point(arena_f3(k,1),...
                 arena_f3(k,2), view_len, view_int_f3(k));
                   
-            %compute forbidden sector coordinates
-            angle_rot = (angle_f3(k) - angle_f3(1)) * -1;
-            [sector_3_x(k, 1), sector_3_y(k, 1)] = rotate(sector_2_x(1), sector_2_y(1), angle_rot);
-            [sector_3_x(k, 2), sector_3_y(k, 2)] = rotate(sector_2_x(2), sector_2_y(2), angle_rot);
-            [sector_3_x(k, 3), sector_3_y(k, 3)] = rotate(sector_2_x(3), sector_2_y(3), angle_rot);
-            [sector_3_x(k, 4), sector_3_y(k, 4)] = rotate(sector_2_x(4), sector_2_y(4), angle_rot);
   
             %diamant data
-            if count_diamant == 1 
-                diam_time_f3(k_diam) = time_f3(k-1);
-                diam_room_f3(k_diam,1) = room_f3(k-1,1);
-                diam_room_f3(k_diam,2) = room_f3(k-1,2);
-                diam_arena_f3(k_diam,1) = arena_f3(k-1,1);
-                diam_arena_f3(k_diam,2) = arena_f3(k-1,2);
-                diam_ent_f3 = diam_ent_f3 + 1;
-                k_diam = k_diam + 1;
-                count_diamant = 0;
-            end
+%             if count_diamant == 1 
+%                 diam_time_f3(k_diam) = time_f3(k-1);
+%                 diam_room_f3(k_diam,1) = room_f3(k-1,1);
+%                 diam_room_f3(k_diam,2) = room_f3(k-1,2);
+%                 diam_arena_f3(k_diam,1) = arena_f3(k-1,1);
+%                 diam_arena_f3(k_diam,2) = arena_f3(k-1,2);
+%                 diam_ent_f3 = diam_ent_f3 + 1;
+%                 k_diam = k_diam + 1;
+%                 count_diamant = 0;
+%             end
             
             %unreal data
             if unreal_entrance == 1
@@ -195,7 +197,35 @@ while read_file == 1
     
     %diamant entrance
     else
-        count_diamant = 1;
+        if time_num < f1
+            diam_time_f1(i_diam) = time_f1(i-1);
+                diam_room_f1(i_diam,1) = room_f1(i-1,1);
+                diam_room_f1(i_diam,2) = room_f1(i-1,2);
+                diam_arena_f1(i_diam,1) = arena_f1(i-1,1);
+                diam_arena_f1(i_diam,2) = arena_f1(i-1,2);
+                diam_ent_f1 = diam_ent_f1 + 1;
+                i_diam = i_diam + 1;
+
+        elseif time_num >= f1 & time_num < f3
+            diam_time_f2(j_diam) = time_f2(j-1);
+                diam_room_f2(j_diam,1) = room_f2(j-1,1);
+                diam_room_f2(j_diam,2) = room_f2(j-1,2);
+                diam_arena_f2(j_diam,1) = arena_f2(j-1,1);
+                diam_arena_f2(j_diam,2) = arena_f2(j-1,2);
+                diam_ent_f2 = diam_ent_f2 + 1;
+                j_diam = j_diam + 1;
+
+        else
+            diam_time_f3(k_diam) = time_f3(k-1);
+                diam_room_f3(k_diam,1) = room_f3(k-1,1);
+                diam_room_f3(k_diam,2) = room_f3(k-1,2);
+                diam_arena_f3(k_diam,1) = arena_f3(k-1,1);
+                diam_arena_f3(k_diam,2) = arena_f3(k-1,2);
+                diam_ent_f3 = diam_ent_f3 + 1;
+                k_diam = k_diam + 1;
+        end
+    
+%         count_diamant = 1;
     
     end
     
@@ -210,6 +240,12 @@ end
 fclose('all');
 
 
+    [sector_3_x(1, 1), sector_3_y(1, 1)] = rotate(sector_2_x(1), sector_2_y(1), angle_f3(1)*-1);
+    [sector_3_x(1, 2), sector_3_y(1, 2)] = rotate(sector_2_x(2), sector_2_y(2), angle_f3(1)*-1);
+    [sector_3_x(1, 3), sector_3_y(1, 3)] = rotate(sector_2_x(3), sector_2_y(3), angle_f3(1)*-1);
+    [sector_3_x(1, 4), sector_3_y(1, 4)] = rotate(sector_2_x(4), sector_2_y(4), angle_f3(1)*-1);
+
+    
 
 %GENERATE OUTPUT DATA
 
@@ -221,7 +257,7 @@ fclose('all');
 %phase2
 [distance_f2, entrances_f2, entrances_index_f2, time_sect_f2, dist_sect_f2,...
     ent_first_f2, room_ent_all_x_f2, room_ent_all_y_f2, arena_ent_all_x_f2,...
-    arena_ent_all_Y_f2] = output(time_f2, room_f2, arena_f2, sector_2_x, sector_2_y);
+    arena_ent_all_y_f2] = output(time_f2, room_f2, arena_f2, sector_2_x, sector_2_y);
 
 %phase3
 [distance_f3, entrances_f3, entrances_index_f3, time_sect_f3, dist_sect_f3,...
@@ -245,78 +281,406 @@ unreal_mis_f3 = setdiff(entrances_index_f3, unreal_ind_f3);
 
 
 
-%CREATE FIGURES
-fig_room = 1; fig_arena = 0;
+% %CREATE SINGLE FIGURES
+% fig_room = 1; fig_arena = 0;
+% 
+% %phase1
+% phase = 1;
+% create_fig_single(fig_room, file_name, phase, room_f1(:, 1), room_f1(:,2),...
+%     room_ent_all_x_f1, room_ent_all_y_f1, diam_room_f1(:,1), diam_room_f1(:,2),...
+%     sector_1_x, sector_1_y, unreal_abund_f1, unreal_mis_f1, view_room_f1);
+% 
+% %save fig
+% file_name_fig = strcat(file_name,'_room_f1.jpg');
+% saveas(gcf, fullfile(filepath, file_name_fig));
+% 
+% create_fig_single(fig_arena, file_name, phase, arena_f1(:, 1), arena_f1(:,2),...
+%     arena_ent_all_x_f1, arena_ent_all_y_f1, diam_arena_f1(:,1), diam_arena_f1(:,2),...
+%     sector_1_x, sector_1_y, unreal_abund_f1, unreal_mis_f1, view_arena_f1);
+% 
+% %save fig
+% file_name_fig = strcat(file_name,'_arena_f1.jpg');
+% saveas(gcf, fullfile(filepath, file_name_fig));
+% 
+% %phase2
+% phase = 2;
+% create_fig_single(fig_room, file_name, phase, room_f2(:, 1), room_f2(:,2),...
+%     room_ent_all_x_f2, room_ent_all_y_f2, diam_room_f2(:,1), diam_room_f2(:,2),...
+%     sector_2_x, sector_2_y, unreal_abund_f2, unreal_mis_f2, view_room_f2);
+% 
+% %save fig
+% file_name_fig = strcat(file_name,'_room_f2.jpg');
+% saveas(gcf, fullfile(filepath, file_name_fig));
+% 
+% create_fig_single(fig_arena, file_name, phase, arena_f2(:, 1), arena_f2(:,2),...
+%     arena_ent_all_x_f2, arena_ent_all_y_f2, diam_arena_f2(:,1), diam_arena_f2(:,2),...
+%     sector_2_x, sector_2_y, unreal_abund_f2, unreal_mis_f2, view_arena_f2);
+% 
+% %save fig
+% file_name_fig = strcat(file_name,'_arena_f2.jpg');
+% saveas(gcf, fullfile(filepath, file_name_fig));
+% 
+% %phase3
+% phase = 3;
+% fig_room = 1; fig_arena = 0;
+% create_fig_single(fig_room, file_name, phase, room_f3(:, 1), room_f3(:,2),...
+%     room_ent_all_x_f3, room_ent_all_y_f3, diam_room_f3(:,1), diam_room_f3(:,2),...
+%     sector_3_x, sector_3_y, unreal_abund_f3, unreal_mis_f3, view_room_f3);
+% 
+% %save fig
+% file_name_fig = strcat(file_name,'_room_f3.jpg');
+% saveas(gcf, fullfile(filepath, file_name_fig));
+% 
+% create_fig_single(fig_arena, file_name, phase, arena_f3(:, 1), arena_f3(:,2),...
+%     arena_ent_all_x_f3, arena_ent_all_y_f3, diam_arena_f3(:,1), diam_arena_f3(:,2),...
+%     sector_3_x, sector_3_y, unreal_abund_f3, unreal_mis_f3, view_arena_f3);
+% 
+% %save fig
+% file_name_fig = strcat(file_name,'_arena_f3.jpg');
+% saveas(gcf, fullfile(filepath, file_name_fig));
 
-%phase1
+
+
+
+% CREATE DOUBLE FIGURES
 phase = 1;
-create_fig(fig_room, file_name, phase, room_f1(:, 1), room_f1(:,2),...
-    room_ent_all_x_f1, room_ent_all_y_f1, diam_room_f1(:,1), diam_room_f1(:,2),...
-    sector_1_x, sector_1_y, unreal_abund_f1, unreal_mis_f1, view_room_f1);
-
+create_fig_double_new (file_name, phase, room_f1(:,1), room_f1(:,2), arena_f1(:,1), arena_f1(:,2),...
+    room_ent_all_x_f1, room_ent_all_y_f1, arena_ent_all_x_f1, arena_ent_all_y_f1,...
+    diam_room_f1(:,1), diam_room_f1(:,2), diam_arena_f1(:,1), diam_arena_f1(:,2),...
+    sector_1_x, sector_1_y, unreal_abund_f1, unreal_mis_f1, view_room_f1, view_arena_f1)
 %save fig
-file_name_fig = strcat(file_name,'_room_f1.jpg');
-saveas(gcf, file_name_fig);
+file_name_fig = strcat(file_name,'_f1.jpg');
+saveas(gcf, fullfile(filepath, file_name_fig));
 
-create_fig(fig_arena, file_name, phase, arena_f1(:, 1), arena_f1(:,2),...
-    arena_ent_all_x_f1, arena_ent_all_y_f1, diam_arena_f1(:,1), diam_arena_f1(:,2),...
-    sector_1_x, sector_1_y, unreal_abund_f1, unreal_mis_f1, view_arena_f1);
-
-%save fig
-file_name_fig = strcat(file_name,'_arena_f1.jpg');
-saveas(gcf, file_name_fig); 
-
-%phase2
 phase = 2;
-create_fig(fig_room, file_name, phase, room_f2(:, 1), room_f2(:,2),...
-    room_ent_all_x_f2, room_ent_all_y_f2, diam_room_f2(:,1), diam_room_f2(:,2),...
-    sector_2_x, sector_2_y, unreal_abund_f2, unreal_mis_f2, view_room_f2);
-
+create_fig_double_new (file_name, phase, room_f2(:,1), room_f2(:,2), arena_f2(:,1), arena_f2(:,2),...
+    room_ent_all_x_f2, room_ent_all_y_f2, arena_ent_all_x_f2, arena_ent_all_y_f2,...
+    diam_room_f2(:,1), diam_room_f2(:,2), diam_arena_f2(:,1), diam_arena_f2(:,2),...
+    sector_2_x, sector_2_y, unreal_abund_f2, unreal_mis_f2, view_room_f2, view_arena_f2)
 %save fig
-file_name_fig = strcat(file_name,'_room_f2.jpg');
-saveas(gcf, file_name_fig);
+file_name_fig = strcat(file_name,'_f2.jpg');
+saveas(gcf, fullfile(filepath, file_name_fig));
 
-create_fig(fig_arena, file_name, phase, arena_f2(:, 1), arena_f2(:,2),...
-    arena_ent_all_x_f2, arena_ent_all_Y_f2, diam_arena_f2(:,1), diam_arena_f2(:,2),...
-    sector_2_x, sector_2_y, unreal_abund_f2, unreal_mis_f2, view_arena_f2);
-
-%save fig
-file_name_fig = strcat(file_name,'_arena_f2.jpg');
-saveas(gcf, file_name_fig); 
-
-%phase3
 phase = 3;
-fig_room = 1; fig_arena = 0;
-create_fig(fig_room, file_name, phase, room_f3(:, 1), room_f3(:,2),...
-    room_ent_all_x_f3, room_ent_all_y_f3, diam_room_f3(:,1), diam_room_f3(:,2),...
-    sector_3_x, sector_3_y, unreal_abund_f3, unreal_mis_f3, view_room_f3);
+create_fig_double_new (file_name, phase, room_f3(:,1), room_f3(:,2), arena_f3(:,1), arena_f3(:,2),...
+    room_ent_all_x_f3, room_ent_all_y_f3, arena_ent_all_x_f3, arena_ent_all_y_f3,...
+    diam_room_f3(:,1), diam_room_f3(:,2), diam_arena_f3(:,1), diam_arena_f3(:,2),...
+    sector_3_x, sector_3_y, unreal_abund_f3, unreal_mis_f3, view_room_f3, view_arena_f3)
+%save fig
+file_name_fig = strcat(file_name,'_f3.jpg');
+saveas(gcf, fullfile(filepath, file_name_fig));
+
+
+
+
+%CREATE ALL FIGURES AS SUBPLOTS
+figure('visible','off')
+x0=100;
+y0=50;
+width=750;
+height=450;
+set(gcf,'units','points','position',[x0,y0,width,height]);
+
+%ROOM FRAME F1=========================================================
+subplot(2,3,1);
+plot(room_f1(:,1), room_f1(:,2),'-o', 'linewidth', 0.5);
+hold on;
+
+%plot view angle line
+for i = 1:length(room_f1)
+    plot([view_room_f1(i,1) room_f1(i,1)], [view_room_f1(i,2) room_f1(i,2)], 'Color', [0.7 0.7 0.7]);
+end
+
+%plot abundant entrances from unreal
+for i = 1:length(unreal_abund_f1)
+    scatter(room_f1(unreal_abund_f1,1), room_f1(unreal_abund_f1,2), 'y', 'filled');
+end
+
+%plot missing entrances from unreal
+for i = 1:length(unreal_mis_f1)
+    scatter(room_f1(unreal_mis_f1,1), room_f1(unreal_mis_f1,2), 'filled',...
+        'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'g');
+end
+
+%plot sector entrances
+scatter(room_ent_all_x_f1(:), room_ent_all_y_f1(:), 'filled', 'r');
+
+%plot diamond entrances
+scatter(diam_room_f1(:,1), diam_room_f1(:,2), 50, 'd',...
+    'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+
+%plot beginning of track
+scatter(room_f1(1,1), room_f1(1,2), 200 ,'r', 'linewidth' , 1);
+
+%plot end of track
+scatter(room_f1(end,1), room_f1(end,2), 200, 'k', 'linewidth' , 1);
+
+%plot sector
+sector_x = [sector_1_x(1), sector_1_x(2), sector_1_x(1), sector_1_x(4)];
+sector_y = [sector_1_y(1), sector_1_y(2), sector_1_y(1), sector_1_y(4)];
+plot (sector_x, sector_y, 'r', 'linewidth', 0.1);
+
+%plot arena boundaries
+r = 900;
+theta = linspace(0,2*pi);
+x = r*cos(theta); 
+y = r*sin(theta);
+plot(x, y, 'k'); 
+
+%generate figure name
+file_name_fig = strrep(file_name, '_','\_');
+fig = [file_name_fig ': phase 1 room frame'];
+title(fig, 'FontSize', 10)
+
+set(gca,'Yticklabel',[]); 
+set(gca,'Xticklabel',[]);
+
+%=====================ARENA FRAME F1===========================
+subplot(2,3,4);
+plot(arena_f1(:,1), arena_f1(:,2),'-o', 'linewidth', 0.5);
+hold on;
+
+%plot view angle line
+for i = 1:length(arena_f1)
+    plot([view_arena_f1(i,1) arena_f1(i,1)], [view_arena_f1(i,2) arena_f1(i,2)], 'Color', [0.7 0.7 0.7]);
+end
+
+%plot abundant entrances from unreal
+for i = 1:length(unreal_abund_f1)
+    scatter(arena_f1(unreal_abund_f1,1), arena_f1(unreal_abund_f1,2), 'y', 'filled');
+end
+
+%plot missing entrances from unreal
+for i = 1:length(unreal_mis_f1)
+    scatter(arena_f1(unreal_mis_f1,1), arena_f1(unreal_mis_f1,2), 'filled',...
+        'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'g');
+end
+
+%plot sector entrances
+scatter(arena_ent_all_x_f1(:), arena_ent_all_y_f1(:), 'filled', 'r');
+
+%plot diamond entrances
+scatter(diam_arena_f1(:,1), diam_arena_f1(:,2), 50, 'd',...
+    'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+
+%plot beginning of track
+scatter(arena_f1(1,1), arena_f1(1,2), 200 ,'r', 'linewidth' , 1);
+
+%plot end of track
+scatter(arena_f1(end,1), arena_f1(end,2), 200, 'k', 'linewidth' , 1);
+
+%plot arena boundaries
+plot(x, y, 'k'); 
+
+%generate figure name
+file_name_fig = strrep(file_name, '_','\_');
+fig = [file_name_fig ': phase 1 arena frame'];
+title(fig, 'FontSize', 10)
+
+set(gca,'Yticklabel',[]); 
+set(gca,'Xticklabel',[]);
+
+%ROOM FRAME F2===========================================================
+subplot(2,3,2);
+plot(room_f2(:,1), room_f2(:,2),'-o', 'linewidth', 0.5);
+hold on;
+
+%plot view angle line
+for i = 1:length(room_f2)
+    plot([view_room_f2(i,1) room_f2(i,1)], [view_room_f2(i,2) room_f2(i,2)], 'Color', [0.7 0.7 0.7]);
+end
+
+%plot abundant entrances from unreal
+for i = 1:length(unreal_abund_f2)
+    scatter(room_f2(unreal_abund_f2,1), room_f2(unreal_abund_f2,2), 'y', 'filled');
+end
+
+%plot missing entrances from unreal
+for i = 1:length(unreal_mis_f2)
+    scatter(room_f2(unreal_mis_f2,1), room_f2(unreal_mis_f2,2), 'filled',...
+        'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'g');
+end
+
+%plot sector entrances
+scatter(room_ent_all_x_f2(:), room_ent_all_y_f2(:), 'filled', 'r');
+
+%plot diamond entrances
+scatter(diam_room_f2(:,1), diam_room_f2(:,2), 50, 'd',...
+    'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+
+%plot beginning of track
+scatter(room_f2(1,1), room_f2(1,2), 200 ,'r', 'linewidth' , 1);
+
+%plot end of track
+scatter(room_f2(end,1), room_f2(end,2), 200, 'k', 'linewidth' , 1);
+
+%plot sector
+sector_x = [sector_2_x(1), sector_2_x(2), sector_2_x(1), sector_2_x(4)];
+sector_y = [sector_2_y(1), sector_2_y(2), sector_2_y(1), sector_2_y(4)];
+plot (sector_x, sector_y, 'r', 'linewidth', 0.1);
+
+%plot arena boundaries
+plot(x, y, 'k'); 
+
+%generate figure name
+file_name_fig = strrep(file_name, '_','\_');
+fig = [file_name_fig ': phase 2 room frame'];
+title(fig, 'FontSize', 10)
+
+set(gca,'Yticklabel',[]); 
+set(gca,'Xticklabel',[]);
+
+%=====================ARENA FRAME F2===========================
+subplot(2,3,5);
+plot(arena_f2(:,1), arena_f2(:,2),'-o', 'linewidth', 0.5);
+hold on;
+
+%plot view angle line
+for i = 1:length(arena_f2)
+    plot([view_arena_f2(i,1) arena_f2(i,1)], [view_arena_f2(i,2) arena_f2(i,2)], 'Color', [0.7 0.7 0.7]);
+end
+
+%plot abundant entrances from unreal
+for i = 1:length(unreal_abund_f2)
+    scatter(arena_f2(unreal_abund_f2,1), arena_f2(unreal_abund_f2,2), 'y', 'filled');
+end
+
+%plot missing entrances from unreal
+for i = 1:length(unreal_mis_f2)
+    scatter(arena_f2(unreal_mis_f2,1), arena_f2(unreal_mis_f2,2), 'filled',...
+        'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'g');
+end
+
+%plot sector entrances
+scatter(arena_ent_all_x_f2(:), arena_ent_all_y_f2(:), 'filled', 'r');
+
+%plot diamond entrances
+scatter(diam_arena_f2(:,1), diam_arena_f2(:,2), 50, 'd',...
+    'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+
+%plot beginning of track
+scatter(arena_f2(1,1), arena_f2(1,2), 200 ,'r', 'linewidth' , 1);
+
+%plot end of track
+scatter(arena_f2(end,1), arena_f2(end,2), 200, 'k', 'linewidth' , 1);
+
+%plot arena boundaries
+plot(x, y, 'k'); 
+
+%generate figure name
+file_name_fig = strrep(file_name, '_','\_');
+fig = [file_name_fig ': phase 2 arena frame'];
+title(fig, 'FontSize', 10)
+
+set(gca,'Yticklabel',[]); 
+set(gca,'Xticklabel',[]);
+
+
+%ROOM FRAME F3=========================================================
+subplot(2,3,3);
+plot(room_f3(:,1), room_f3(:,2),'-o', 'linewidth', 0.5);
+hold on;
+
+%plot view angle line
+for i = 1:length(room_f3)
+    plot([view_room_f3(i,1) room_f3(i,1)], [view_room_f3(i,2) room_f3(i,2)], 'Color', [0.7 0.7 0.7]);
+end
+
+%plot abundant entrances from unreal
+for i = 1:length(unreal_abund_f3)
+    scatter(room_f3(unreal_abund_f3,1), room_f3(unreal_abund_f3,2), 'y', 'filled');
+end
+
+%plot missing entrances from unreal
+for i = 1:length(unreal_mis_f3)
+    scatter(room_f3(unreal_mis_f3,1), room_f3(unreal_mis_f3,2), 'filled',...
+        'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'g');
+end
+
+%plot sector entrances
+scatter(room_ent_all_x_f3(:), room_ent_all_y_f3(:), 'filled', 'r');
+
+%plot diamond entrances
+scatter(diam_room_f3(:,1), diam_room_f3(:,2), 50, 'd',...
+    'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+
+%plot beginning of track
+scatter(room_f3(1,1), room_f3(1,2), 200 ,'r', 'linewidth' , 1);
+
+%plot end of track
+scatter(room_f3(end,1), room_f3(end,2), 200, 'k', 'linewidth' , 1);
+
+%plot arena boundaries
+plot(x, y, 'k'); 
+
+%generate figure name
+file_name_fig = strrep(file_name, '_','\_');
+fig = [file_name_fig ': phase 3 room frame'];
+title(fig, 'FontSize', 10)
+
+set(gca,'Yticklabel',[]); 
+set(gca,'Xticklabel',[]);
+
+%=====================ARENA FRAME F3===========================
+subplot(2,3,6);
+plot(arena_f3(:,1), arena_f3(:,2),'-o', 'linewidth', 0.5);
+hold on;
+
+%plot view angle line
+for i = 1:length(arena_f3)
+    plot([view_arena_f3(i,1) arena_f3(i,1)], [view_arena_f3(i,2) arena_f3(i,2)], 'Color', [0.7 0.7 0.7]);
+end
+
+%plot abundant entrances from unreal
+for i = 1:length(unreal_abund_f3)
+    scatter(arena_f3(unreal_abund_f3,1), arena_f3(unreal_abund_f3,2), 'y', 'filled');
+end
+
+%plot missing entrances from unreal
+for i = 1:length(unreal_mis_f3)
+    scatter(arena_f3(unreal_mis_f3,1), arena_f3(unreal_mis_f3,2), 'filled',...
+        'MarkerEdgeColor', 'r', 'MarkerFaceColor', 'g');
+end
+
+%plot sector entrances
+scatter(arena_ent_all_x_f3(:), arena_ent_all_y_f3(:), 'filled', 'r');
+
+%plot diamond entrances
+scatter(diam_arena_f3(:,1), diam_arena_f3(:,2), 50, 'd',...
+    'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+
+%plot beginning of track
+scatter(arena_f3(1,1), arena_f3(1,2), 200 ,'r', 'linewidth' , 1);
+
+%plot end of track
+scatter(arena_f3(end,1), arena_f3(end,2), 200, 'k', 'linewidth' , 1);
+
+%plot arena boundaries
+plot(x, y, 'k'); 
+
+%plot sector
+sector_x = [sector_3_x(1), sector_3_x(2), sector_3_x(1), sector_3_x(4)];
+sector_y = [sector_3_y(1), sector_3_y(2), sector_3_y(1), sector_3_y(4)];
+plot (sector_x, sector_y, 'r', 'linewidth', 0.1);
+
+%generate figure name
+file_name_fig = strrep(file_name, '_','\_');
+fig = [file_name_fig ': phase 3 arena frame'];
+title(fig, 'FontSize', 10)
+
+set(gca,'Yticklabel',[]); 
+set(gca,'Xticklabel',[]);
 
 %save fig
-file_name_fig = strcat(file_name,'_room_f3.jpg');
-saveas(gcf, file_name_fig);
-
-create_fig(fig_arena, file_name, phase, arena_f3(:, 1), arena_f3(:,2),...
-    arena_ent_all_x_f3, arena_ent_all_y_f3, diam_arena_f3(:,1), diam_arena_f3(:,2),...
-    sector_3_x, sector_3_y, unreal_abund_f3, unreal_mis_f3, view_arena_f3);
-
-%save fig
-file_name_fig = strcat(file_name,'_arena_f3.jpg');
-saveas(gcf, file_name_fig);
+file_name_fig = strcat(file_name,'_all.jpg');
+saveas(gcf, fullfile(filepath, file_name_fig));
 
 
 
-%CREATE AND DISPLAY OUTPUT TABLE
-distance = [distance_f1; distance_f2; distance_f3];
-entrances = [entrances_f1; entrances_f2; entrances_f3];
-first_ent = [ent_first_f1; ent_first_f2; ent_first_f3];
-time_sect = [time_sect_f1; time_sect_f2; time_sect_f3];
-dist_sect = [dist_sect_f1; dist_sect_f2; dist_sect_f3];
-diamant_ent = [diam_ent_f1; diam_ent_f2; diam_ent_f3;];
-output_disp = [distance, entrances, first_ent, time_sect, dist_sect, diamant_ent];
 
-disp(file_name);
-disp('distance, entrances, 1st entrance, time in sector, distance in sector, diamant');
-disp(output_disp);
+
+%CREATE OUTPUT DATA
+output_an = [distance_f1, distance_f2, distance_f3, entrances_f1, entrances_f2, entrances_f3,ent_first_f1, ent_first_f2, ent_first_f3, time_sect_f1, time_sect_f2, time_sect_f3, dist_sect_f1, dist_sect_f2, dist_sect_f3, diam_ent_f1, diam_ent_f2, diam_ent_f3];
 
 
 end

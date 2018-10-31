@@ -13,11 +13,11 @@ for i = 1:length(room_x)
     end
     
     %forbiden sector data
-    sector_x_point = [sector_x(i, 1),sector_x(i, 2), sector_x(i, 3), sector_x(i, 4)];
-    sector_y_point = [sector_y(i, 1), sector_y(i, 2), sector_y(i, 3), sector_y(i, 4)];
+%     sector_x_point = [sector_x(i, 1),sector_x(i, 2), sector_x(i, 3), sector_x(i, 4)];
+%     sector_y_point = [sector_y(i, 1), sector_y(i, 2), sector_y(i, 3), sector_y(i, 4)];
     
     %register entrance
-    in = inpolygon(room_x(i), room_y(i),sector_x_point, sector_y_point);
+    in = inpolygon(arena_x(i), arena_y(i),sector_x, sector_y);
     if in == 1
         room_ent_all_X(k) = room_x(i);
         room_ent_all_Y(k) = room_y(i);
