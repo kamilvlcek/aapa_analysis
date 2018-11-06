@@ -32,7 +32,7 @@ end
 scatter(room_ent_all_X(:), room_ent_all_Y(:), 'filled', 'r');
 
 %plot diamond entrances
-scatter(diamant_ent_room_x(:), diamant_ent_room_y(:), 50, 'd',...
+scatter(diamant_ent_room_x(:), diamant_ent_room_y(:), 15, 'd',...
     'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
 
 %plot beginning of track
@@ -88,7 +88,7 @@ end
 scatter(arena_ent_all_X(:), arena_ent_all_Y(:), 'filled', 'r');
 
 %plot diamond entrances
-scatter(diamant_ent_arena_x(:), diamant_ent_arena_y(:), 50, 'd',...
+scatter(diamant_ent_arena_x(:), diamant_ent_arena_y(:), 15, 'd',...
     'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
 
 %plot beginning of track
