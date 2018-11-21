@@ -19,8 +19,14 @@ data = {'filename ', 'distance f1 ', 'f2 ', 'f3 ', 'entrances f1 ', 'f2 ', 'f3 '
 for i = 1:length(files)
     fprintf('%s ... ', files(i).name); %pro vice souboru je trosku videt, v jake fazi zpracovani to je - Kamil
     file_name = strcat(folder, files(i).name);
-    analysis_output = analysis(file_name);
-    
+    try
+        analysis_output = analysis(file_name); 
+        %selze vsude pokud pouziju moji verzi contains.m, pro spravny chod musim odkomentovat
+    catch exception 
+        errorMessage = exceptionLog(exception);
+        disp(errorMessage);     %zobrazim hlasku, snad to bude pokracovat dal                                    
+        analysis_output = nan(1,18); %prazdna data, ale potrebuju do vystupni tabulky
+    end
     %save output to cell array
     for j = 1:18
         data{i+1,1} = files(i).name;
