@@ -1,5 +1,5 @@
-function data = aapa_II_main(folder)
-
+function data = aapa_II_main(folder,closefig)
+if ~exist('closefig','var'), closefig = 0; end %defaultne se NEzaviraji obrazky po ulozeni
 if ~exist('folder','var') %pokud uz nemam folder - Kamil
 % get folder name with input data files
     folder_input = uigetdir;
@@ -18,9 +18,9 @@ data = {'filename ', 'distance f0 ', 'f1 ', 'f2 ', 'f3 ', 'entrances f0 ', 'f1 '
 
 % process data files
 for i = 1:length(files)
-    fprintf('%s ... ', files(i).name); %pro vice souboru je trosku videt, v jake fazi zpracovani to je - Kamil
+    fprintf('file %i/%i  %s ... ', i, numel(files), files(i).name); %pro vice souboru je trosku videt, v jake fazi zpracovani to je - Kamil
     file_name = strcat(folder, files(i).name);
-    analysis_output = analysis_II(file_name);
+    analysis_output = analysis_II(file_name,closefig);
     
     %save output to cell array
     for j = 1:28

@@ -1,5 +1,6 @@
-function output_data = analysis_II(file_name_full)
+function output_data = analysis_II(file_name_full,closefig)
 
+if ~exist('closefig','var'), closefig = 0; end %defaultne se NEzaviraji obrazky po ulozeni
 % default output data in case of an error
 output_data = [-1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1];
 
@@ -410,7 +411,11 @@ for phase = 1:4
         
     % save figures 
     plot_fname = erase(file_name, '.log');
-    file_name_fig = strcat(plot_fname,'_f', num2str(phase-1),'.jpg');
+    if exist([filepath,'\figures\'],'dir') ~= 7
+        mkdir(filepath,'figures'); %podadresar, kam budu uklada obrazky
+    end
+        
+    file_name_fig = strcat(filepath,'\figures\',plot_fname,'_f', num2str(phase-1),'.jpg'); %obrazek ulozim s plnou cestu k datum 
         
     saveas(gcf, file_name_fig);
         
@@ -421,7 +426,11 @@ end
 % CREATE ALL FIG
 
 %figure('visible','on')
-figure
+if closefig
+    fh = figure('visible','off');
+else
+    fh = figure('visible','on');
+end
 x0=100;
 y0=50;
 width=550;
@@ -579,8 +588,8 @@ for phase = 1:4
 end
 
 % save figure
-file_name_fig = strcat(file_name,'.jpg');
-saveas(gcf, file_name_fig);
-
+file_name_fig = strcat(filepath,'\figures\',file_name,'.jpg'); %obrazek ulozim s plnou cestu k datum 
+saveas(gcf, file_name_fig); 
+if closefig, close(fh); end
 %% OUTPUT DATA
 output_data = [distance, entrances, entrances_unr, ent_first, time_sect, dist_sect, diamants];
