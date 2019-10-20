@@ -2,7 +2,8 @@ function output_data = analysis_II(file_name_full,closefig)
 
 if ~exist('closefig','var'), closefig = 0; end %defaultne se NEzaviraji obrazky po ulozeni
 % default output data in case of an error
-output_data = [-1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1];
+output_data = [-1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1,...
+    -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1];
 
 % DEFINE FORBIDDEN SECTORS
 global sectorX;
@@ -53,22 +54,24 @@ time_of_change = -1;
 % LOAD XY ROOM COORDINATES AND ARENA ANGLE
 while 1
   
-    if feof(data_file)
+    line = fgetl(data_file); % get line
+    
+    if feof(data_file)||contains (line, 'Experiment ended')
         % throw message if file not complete
         if time_now < 598
             time_num_str = string(time_now);
             if time_now < 180
-                error_msg = strcat(file_name, ' incomplete, time: ', time_num_str, ' file not proccesed');
+                error_msg = strcat(' ... incomplete, time: ', time_num_str, ', file NOT proccesed');
+                disp(error_msg);
                 return
             else
-                error_msg = strcat(file_name, ' incomplete, time: ', time_num_str);
+                error_msg = strcat(' ... incomplete, time: ', time_num_str, '');
+                disp(error_msg);
             end
-            disp(error_msg);
         end
         break;
     end
     
-    line = fgetl(data_file); % get line
     
     % file with platform rotation
     if (contains (line, 'Player') || contains (line, 'Platform')) && file_set == 0
@@ -99,23 +102,24 @@ while 1
     
     % get current time
     time_temp = (min * 60) + s + (ms/1000);
-    
-    % check for sudden time change
-    if time_temp_l ~= 0
-        if time_temp < time_temp_l
-            line = strcat('Error procesing, time change: ', file_name);
-            disp(line);
-            return % exit function if time went back
-        elseif time_temp - time_temp_l > max_time_change
-            if ~contains(line,'Closing log File')
-                line = strcat('Time change, file being processed: ', file_name);
-                disp(line);
-                % save time change
-                time_change = time_temp - time_temp_l + frame_rate;
-                time_of_change = time_temp;
-            end
-        end
-    end
+
+%     % check for sudden time change = nespravne pocita!
+%     if time_temp_l ~= 0
+%         if time_temp < time_temp_l
+%             line = strcat('Error procesing, time change: ');
+%             disp(line);
+%             return % exit function if time went back
+% 
+%         elseif time_temp - time_temp_l > max_time_change
+%             if ~contains(line,'Closing log File')
+%                 line = strcat('Time change, file being processed: ');
+%                 disp(line);
+%                 % save time change
+%                 time_change = time_temp - time_temp_l + frame_rate;
+%                 time_of_change = time_temp;
+%             end
+%         end
+%     end
     
     
     % get current experiment time and correct time inaccuracy
@@ -171,7 +175,6 @@ while 1
     end
     
 end
-
 
 
 % generate arena frame coordinates and viewing point for figures
@@ -245,7 +248,6 @@ diam_count = 1;
 phase = 1;
 row_sect = 1;
 sect_ent = [0 0 0 0]; sect_exit = [0 0 0 0]; diam = [0 0 0 0];
-results = [0 0 0];
 ent_low = [0 0 0 0]; diam_low = [0 0 0 0]; ent_high = [0 0 0 0]; diam_high = [0 0 0 0];
 ent_pol_x = [0 0 0 0];
 ent_pol_y = [0 0 0 0];
@@ -260,15 +262,15 @@ diam_pol_y_arena = [0 0 0 0];
 ent_pol_x_arena = [0 0 0 0]; ent_pol_y_arena = [0 0 0 0];
 exit_pol_x_arena = [0 0 0 0]; exit_pol_y_arena = [0 0 0 0];
 
-diamants = [-1 -1 -1 -1];
-entrances_unr = [-1 -1 -1 -1];
+diamants_unr = [-1 -1 -1 -1]; time_sect_unr = [-1 -1 -1 -1]; entrances_phase_unr = [-1 -1 -1 -1];
+diamants = [-1 -1 -1 -1]; entrances_unr = [-1 -1 -1 -1];
 
 while 1
     
     line = fgetl(data_file_events); % get line
     
     % stop reading at the end of data log
-    if feof(data_file_events)
+    if feof(data_file_events)||contains (line, 'Experiment ended')
         break;
     end
     
@@ -359,13 +361,14 @@ while 1
         diam_count = 1;
         
         row = str2double(line_spl(3))+1; %nebrat vstupy vo vysledku z tohto, v logu nie su pocitane ent (chyba)
-        results(row, 1) = str2double(line_spl(5));
-        results(row, 2) = str2double(line_spl(9)); 
-        results(row, 3) = str2double(line_spl(13));
+        diamants_unr(1, row) = str2double(line_spl(5));
+        time_sect_unr(1, row) = str2double(line_spl(9)); 
+        entrances_phase_unr(1, row) = str2double(line_spl(13));
         phase = phase + 1;
     end
 end
 
+        
 
 %% GENERATE FORBIDDEN SECTOR DATA
 room_ent_x = [0 0 0 0]; room_ent_y = [0 0 0 0]; arena_ent_x = [0 0 0 0]; arena_ent_y = [0 0 0 0];
@@ -447,9 +450,11 @@ for phase = 1:4
         subp_top = subp_top + 1;
         subplot(2,4,subp_top);
     
-        % plot track
-        plot(room_x(1:f_len(phase),phase), room_y(1:f_len(phase),phase),'-o','MarkerIndices',1:4:f_len(phase), 'linewidth', 0.5);
+        % plot track      
+        %plot(room_x(1:f_len(phase),phase), room_y(1:f_len(phase),phase),'-o','MarkerIndices',1:4:f_len(phase), 'linewidth', 0.5);
+        plot(room_x(1:f_len(phase),phase), room_y(1:f_len(phase),phase),'-o', 'MarkerSize', 1.5, 'linewidth', 0.5);
         hold on;
+        %scatter(room_x(1:f_len(phase),phase), room_y(1:f_len(phase),phase), 3, 'b', 'filled');
     
         % plot view points
         for i = 1:f_len(phase)
@@ -460,24 +465,24 @@ for phase = 1:4
     
         % plot entrances from unreal
         if length(ent_pol_x) > 0
-            scatter(ent_pol_x(1:entrances_unr(phase),phase), ent_pol_y(1:entrances_unr(phase),phase), 20, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+            scatter(ent_pol_x(1:entrances_unr(phase),phase), ent_pol_y(1:entrances_unr(phase),phase), 10, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
         end
     
         % plot sector exit from unreal
         if length(exit_pol_x) > 0
-            scatter(exit_pol_x(1:entrances_unr(phase),phase), exit_pol_y(1:entrances_unr(phase),phase), 15, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+            scatter(exit_pol_x(1:entrances_unr(phase),phase), exit_pol_y(1:entrances_unr(phase),phase), 10, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
         end
 
         % plot entrances
          if length(room_ent_x) > 0
             if ((room_ent_x(1)) ~= 0) && (length(room_ent_x) ~= 1)
-                scatter(room_ent_x(1:ent_len(phase),phase), room_ent_y(1:ent_len(phase),phase), 'r', 'linewidth' , 0.8);
+                scatter(room_ent_x(1:ent_len(phase),phase), room_ent_y(1:ent_len(phase),phase), 5, 'r', 'filled', 'linewidth' , 0.8);
             end
          end
     
         % plot diamant entrances
         if length(diam_pol_x) > 0
-            scatter(diam_pol_x(1:diamants(phase),phase), diam_pol_y(1:diamants(phase),phase), 15, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+            scatter(diam_pol_x(1:diamants(phase),phase), diam_pol_y(1:diamants(phase),phase), 13, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
         end
     
         % plot begging of track
@@ -520,7 +525,7 @@ for phase = 1:4
         subplot(2,4,subp_bot);
     
         % plot track
-        plot(arena_x(1:f_len(phase),phase), arena_y(1:f_len(phase),phase),'-o','MarkerIndices',1:4:f_len(phase), 'linewidth', 0.5);
+        plot(arena_x(1:f_len(phase),phase), arena_y(1:f_len(phase),phase),'-o', 'MarkerSize', 1.5, 'linewidth', 0.5);
         hold on;
     
         % plot view points
@@ -532,24 +537,24 @@ for phase = 1:4
     
         % plot entrances from unreal
         if length(ent_pol_x_arena) > 0
-            scatter(ent_pol_x_arena(1:entrances_unr(phase),phase), ent_pol_y_arena(1:entrances_unr(phase),phase), 20, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+            scatter(ent_pol_x_arena(1:entrances_unr(phase),phase), ent_pol_y_arena(1:entrances_unr(phase),phase), 10, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
         end
     
         % plot sector exit from unreal
         if length(exit_pol_x_arena) > 0
-            scatter(exit_pol_x_arena(1:entrances_unr(phase),phase), exit_pol_y_arena(1:entrances_unr(phase),phase), 15, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+            scatter(exit_pol_x_arena(1:entrances_unr(phase),phase), exit_pol_y_arena(1:entrances_unr(phase),phase), 10, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
         end
 
         % plot entrances
         if length(arena_ent_x) > 0
             if ((arena_ent_x(1)) ~= 0) && (length(arena_ent_x) ~= 1)
-                scatter(arena_ent_x(1:ent_len(phase),phase), arena_ent_y(1:ent_len(phase),phase), 'r', 'linewidth' , 0.8);
+                scatter(arena_ent_x(1:ent_len(phase),phase), arena_ent_y(1:ent_len(phase),phase), 5, 'r', 'filled', 'linewidth' , 0.8);
             end
         end
     
         % plot diamant entrances
         if length(diam_pol_x_arena) > 0
-            scatter(diam_pol_x_arena(1:diamants(phase),phase), diam_pol_y_arena(1:diamants(phase),phase), 15, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+            scatter(diam_pol_x_arena(1:diamants(phase),phase), diam_pol_y_arena(1:diamants(phase),phase), 13, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
         end
     
         % plot begging of track
@@ -591,5 +596,7 @@ end
 file_name_fig = strcat(filepath,'\figures\',file_name,'.jpg'); %obrazek ulozim s plnou cestu k datum 
 saveas(gcf, file_name_fig); 
 if closefig, close(fh); end
+
 %% OUTPUT DATA
-output_data = [distance, entrances, entrances_unr, ent_first, time_sect, dist_sect, diamants];
+output_data = [distance, entrances, entrances_unr, entrances_phase_unr, ent_first, time_sect, time_sect_unr, dist_sect, diamants, diamants_unr];
+fprintf(' ... file OK \n'); 

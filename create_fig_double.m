@@ -13,7 +13,7 @@ set(gcf,'units','points','position',[x0,y0,width,height]);
 subplot(1,2,1);
     
     % plot track
-    plot(room_x(:), room_y(:),'-o','MarkerIndices',1:4:length(room_x), 'linewidth', 0.5);
+    plot(room_x(:), room_y(:),'-o', 'MarkerSize', 1.5, 'linewidth', 0.5);
     hold on;
     
     % plot view points
@@ -25,24 +25,24 @@ subplot(1,2,1);
     
     % plot entrances from unreal
     if length(ent_pol_x) > 0
-    scatter(ent_pol_x(:), ent_pol_y(:), 20, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+    scatter(ent_pol_x(:), ent_pol_y(:), 10, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
     end
     
     % plot sector exit from unreal
     if length(exit_pol_x) > 0
-    scatter(exit_pol_x(:), exit_pol_y(:), 15, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+    scatter(exit_pol_x(:), exit_pol_y(:), 10, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
     end
 
     % plot entrances
     if length(room_ent_x) > 0
-                if ((room_ent_x(1)) ~= 0) && (length(room_ent_x) ~= 1)
-    scatter(room_ent_x(:), room_ent_y(:), 'r', 'linewidth' , 0.8);
+        if ((room_ent_x(1)) ~= 0) && (length(room_ent_x) ~= 1)
+            scatter(room_ent_x(:), room_ent_y(:), 5, 'r', 'filled', 'linewidth' , 0.8);
         end
     end
     
     % plot diamant entrances
     if length(diam_pol_x) > 0
-    scatter(diam_pol_x(:), diam_pol_y(:), 15, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+    scatter(diam_pol_x(:), diam_pol_y(:), 13, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
     end
     
     % plot begging of track
@@ -82,7 +82,7 @@ subplot(1,2,1);
 subplot(1,2,2);
     
     % plot track
-    plot(arena_x(:), arena_y(:),'-o','MarkerIndices',1:4:length(arena_x), 'linewidth', 0.5);
+    plot(arena_x(:), arena_y(:),'-o', 'MarkerSize', 1.5, 'linewidth', 0.5);
     hold on;
     
     % plot view points
@@ -94,24 +94,24 @@ subplot(1,2,2);
     
     % plot entrances from unreal
     if length(ent_pol_x_arena) > 0
-    scatter(ent_pol_x_arena(:), ent_pol_y_arena(:), 20, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+    scatter(ent_pol_x_arena(:), ent_pol_y_arena(:), 10, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
     end
     
     % plot sector exit from unreal
     if length(exit_pol_x_arena) > 0
-    scatter(exit_pol_x_arena(:), exit_pol_y_arena(:), 15, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+    scatter(exit_pol_x_arena(:), exit_pol_y_arena(:), 10, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
     end
 
     % plot entrances
     if length(arena_ent_x) > 0
     if ((arena_ent_x(1)) ~= 0) && (length(arena_ent_x) ~= 1)
-    scatter(arena_ent_x(:), arena_ent_y(:), 'r', 'linewidth' , 0.8);
+    scatter(arena_ent_x(:), arena_ent_y(:), 5, 'r', 'filled', 'linewidth' , 0.8);
         end
     end
     
     % plot diamant entrances
     if length(diam_pol_x_arena) > 0
-    scatter(diam_pol_x_arena(:), diam_pol_y_arena(:), 15, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+    scatter(diam_pol_x_arena(:), diam_pol_y_arena(:), 13, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
     end
     
     % plot begging of track
