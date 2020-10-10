@@ -1,9 +1,11 @@
-function output_data = analysis_II(file_name_full,closefig)
+function [subj, diamTimes, entTimes, entDur, room_x, room_y, arena_x, arena_y, f_len] = analysis_II(file_name_full,closefig)
 
 if ~exist('closefig','var'), closefig = 0; end %defaultne se NEzaviraji obrazky po ulozeni
-% default output data in case of an error
-output_data = [-1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1,...
-    -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1, -1 -1 -1 -1];
+
+
+% DEFINE MIN FILE LENGTH (min time[s] length neccesary to begin processing)
+min_length = 180;
+
 
 % DEFINE FORBIDDEN SECTORS
 global sectorX;
@@ -15,17 +17,12 @@ sectorY = [0, -1200, -2080, -600;
             0, 600, 0, -600;
             0, 600, 2001, 1200];
 
-        
-% DEFINE PARAMETERS FOR DETECTING TIME CHANGE
-frame_rate = 0.1;
-max_time_change = 2;        
-
 
 % CHECK IF EVENTS FILE EXISTS AND CREATE THE NAME FOR IT
 file_name_events = erase(file_name_full, '_T');
 
 % create file name for figs and saving
-[filepath, file_name,ext] = fileparts(file_name_events);
+[filepath, file_name,~] = fileparts(file_name_events);
 
 % check for existence
 if ~exist(file_name_events, 'file')
@@ -33,6 +30,13 @@ if ~exist(file_name_events, 'file')
     disp(line);
     return
 end
+
+
+% CREATE OBJECTS FOR STORING RESULTS
+subj = SubjectResults;
+diamTimes = SubjectTimes;
+entTimes = SubjectTimes;
+entDur = SubjectTimes;
 
 
 %% LOAD DATA 
@@ -43,11 +47,12 @@ phase = 1; last_phase = 1;
 beg_count = 1;
 row_pl = 1; row_ps = 1; row_an = 1;
 room_x = [0 0 0 0]; room_y = [0 0 0 0];
+arena_x = [0 0 0 0]; arena_y = [0 0 0 0];
 view = [0 0 0 0];
 f_len = [0 0 0 0];
 time = [0 0 0 0];
 file_rot = 'empty'; file_loc = 'empty';
-time_temp = 0; time_temp_l = 0;
+time_temp = 0;
 time_change = 0;
 time_of_change = -1;
 
@@ -57,15 +62,20 @@ while 1
     line = fgetl(data_file); % get line
     
     if feof(data_file)||contains (line, 'Experiment ended')
-        % throw message if file not complete
+        
+        % throw error message if file not complete
         if time_now < 598
             time_num_str = string(time_now);
-            if time_now < 180
-                error_msg = strcat(' ... incomplete, time: ', time_num_str, ', file NOT proccesed');
+            
+            if time_now < min_length
+                error_msg = strcat(' ... incomplete, time: ', time_num_str, 's, file NOT processed');
+                subj.status = 'NOT processed';
                 disp(error_msg);
                 return
+            
             else
-                error_msg = strcat(' ... incomplete, time: ', time_num_str, '');
+                error_msg = strcat(' ... incomplete, time: ', time_num_str, 's, processing file');
+                subj.status = 'INC, processed';
                 disp(error_msg);
             end
         end
@@ -103,28 +113,7 @@ while 1
     % get current time
     time_temp = (min * 60) + s + (ms/1000);
 
-%     % check for sudden time change = nespravne pocita!
-%     if time_temp_l ~= 0
-%         if time_temp < time_temp_l
-%             line = strcat('Error procesing, time change: ');
-%             disp(line);
-%             return % exit function if time went back
-% 
-%         elseif time_temp - time_temp_l > max_time_change
-%             if ~contains(line,'Closing log File')
-%                 line = strcat('Time change, file being processed: ');
-%                 disp(line);
-%                 % save time change
-%                 time_change = time_temp - time_temp_l + frame_rate;
-%                 time_of_change = time_temp;
-%             end
-%         end
-%     end
-    
-    
-    % get current experiment time and correct time inaccuracy
-    time_temp_l = time_temp;
-    
+    % get current experiment time and correct time inaccuracy  
     time_corrected = time_temp - time_change; 
     
     if (time_corrected - time_beg < 0)
@@ -182,7 +171,6 @@ end
 view_len = 65;
 view_room_x = [0 0 0 0]; view_room_y = [0 0 0 0];
 view_arena_x = [0 0 0 0]; view_arena_y = [0 0 0 0];
-arena_x = [0 0 0 0]; arena_y = [0 0 0 0];
 rot_speed = 15; % 15 stupnov/s
 gen_sect = 1;
 ang = 151.3972930908203;
@@ -247,23 +235,19 @@ beg_count = 1;
 diam_count = 1;
 phase = 1;
 row_sect = 1;
-sect_ent = [0 0 0 0]; sect_exit = [0 0 0 0]; diam = [0 0 0 0];
+diam = [0 0 0 0];
 ent_low = [0 0 0 0]; diam_low = [0 0 0 0]; ent_high = [0 0 0 0]; diam_high = [0 0 0 0];
 ent_pol_x = [0 0 0 0];
 ent_pol_y = [0 0 0 0];
 exit_pol_x = [0 0 0 0];
 exit_pol_y = [0 0 0 0];
 exit_low = [0 0 0 0]; exit_high = [0 0 0 0];
-entranrances_unr = [0];
 diam_pol_x = [0 0 0 0];
 diam_pol_y = [0 0 0 0];
 diam_pol_x_arena = [0 0 0 0];
 diam_pol_y_arena = [0 0 0 0];
 ent_pol_x_arena = [0 0 0 0]; ent_pol_y_arena = [0 0 0 0];
 exit_pol_x_arena = [0 0 0 0]; exit_pol_y_arena = [0 0 0 0];
-
-diamants_unr = [-1 -1 -1 -1]; time_sect_unr = [-1 -1 -1 -1]; entrances_phase_unr = [-1 -1 -1 -1];
-diamants = [-1 -1 -1 -1]; entrances_unr = [-1 -1 -1 -1];
 
 while 1
     
@@ -302,7 +286,24 @@ while 1
     % get times of diamant entrances
     if contains (line, 'Diamant entered')
         diam(diam_count,phase) = time_now;
-        %get clloset high and low xy coordinated for each entrances
+        
+        %save diamant time for output
+        %convert sum time into phase time
+        if phase == 1
+            diam_phase_time = time_now;
+        elseif phase == 2
+            diam_phase_time = time_now - 60;
+        elseif phase == 3
+            diam_phase_time = time_now - 240;
+        else
+            diam_phase_time = time_now - 420;
+        end
+        % load times into object        
+        props = properties(diamTimes);
+        thisprop = props{phase};
+        diamTimes.(thisprop)(diam_count) = round(diam_phase_time, 2);
+
+        %get closet high and low xy coordinated for each entrances
         [diam_low(diam_count, phase), diam_high(diam_count, phase)] = get_closest(time(1:f_len(phase),phase), time_now);
         diam_pol_x(diam_count, phase) = interpolate(time(diam_low(diam_count, phase),phase), time(diam_high(diam_count, phase),phase), time_now, room_x(diam_low(diam_count, phase),phase), room_x(diam_high(diam_count, phase),phase));
         diam_pol_y(diam_count, phase) = interpolate(time(diam_low(diam_count, phase),phase), time(diam_high(diam_count, phase),phase), time_now, room_y(diam_low(diam_count, phase),phase), room_y(diam_high(diam_count, phase),phase));
@@ -311,23 +312,46 @@ while 1
         diam_pol_x_arena(diam_count, phase) = interpolate(time(diam_low(diam_count, phase),phase), time(diam_high(diam_count, phase),phase), time_now, arena_x(diam_low(diam_count, phase),phase), arena_x(diam_high(diam_count, phase),phase));
         diam_pol_y_arena(diam_count, phase) = interpolate(time(diam_low(diam_count, phase),phase), time(diam_high(diam_count, phase),phase), time_now, arena_y(diam_low(diam_count, phase),phase), arena_y(diam_high(diam_count, phase),phase));
         
-        diamants(phase) = diam_count;
+        subj.diamants(phase) = diam_count;
         diam_count = diam_count + 1; 
         
         
     % get times of sector entrance
     elseif contains (line, 'Avoidance entered')
         ent = time_now;
-        entrances_unr(phase) = row_sect;
+        
     
     % get times of sector exit
     elseif contains (line, 'Avoidance left')
         exit = time_now;
+        subj.entrances_unr(phase) = row_sect;
+        
+        % save duration of each entrance into object
+        props = properties(entDur);
+        thisprop = props{phase};
+        entDur.(thisprop)(row_sect) = round(exit - ent, 2);
+        
+        %save entrance time for output
+        %convert sum time into phase time
+        if phase == 1
+            ent_phase_time = time_now;
+        elseif phase == 2
+            ent_phase_time = time_now - 60;
+        elseif phase == 3
+            ent_phase_time = time_now - 240;
+        else
+            ent_phase_time = time_now - 420;
+        end
+        
+        % load times into object        
+        props = properties(entTimes);
+        thisprop = props{phase};
+        entTimes.(thisprop)(row_sect) = round(ent_phase_time, 2);
+        
         if exit - ent >= 0.001
             
             %get clloset high and low xy coordinated for each entrances and
             %interpolate ot get accurate position - for entrances
-            sector_ent(row_sect, phase) = ent;
             [ent_low(row_sect, phase), ent_high(row_sect, phase)] = get_closest(time(1:f_len(phase),phase), ent);
             
             ent_pol_x(row_sect, phase) = interpolate(time(ent_low(row_sect, phase),phase), time(ent_high(row_sect, phase),phase), ent, room_x(ent_low(row_sect, phase),phase), room_x(ent_high(row_sect, phase),phase));
@@ -337,7 +361,6 @@ while 1
             ent_pol_y_arena(row_sect, phase) = interpolate(time(ent_low(row_sect, phase),phase), time(ent_high(row_sect, phase),phase), ent, arena_y(ent_low(row_sect, phase),phase), arena_y(ent_high(row_sect, phase),phase));
             
             % for exits
-            sector_exit(row_sect, phase) = exit;
             [exit_low(row_sect, phase), exit_high(row_sect, phase)] = get_closest(time(1:f_len(phase),phase), exit);
             
             exit_pol_x(row_sect, phase) = interpolate(time(exit_low(row_sect, phase),phase), time(exit_high(row_sect, phase),phase), exit, room_x(exit_low(row_sect, phase),phase), room_x(exit_high(row_sect, phase),phase));
@@ -355,15 +378,15 @@ while 1
         line_spl = strsplit(line, {' ', ','},'CollapseDelimiters',true);
         
         %diamant count, sector time, entrances
-        entrances_unr(phase) = row_sect - 1;
+        subj.entrances_unr(phase) = row_sect - 1;
         row_sect = 1;
-        diamants(phase) = diam_count - 1;
+        subj.diamants(phase) = diam_count - 1;
         diam_count = 1;
         
         row = str2double(line_spl(3))+1; %nebrat vstupy vo vysledku z tohto, v logu nie su pocitane ent (chyba)
-        diamants_unr(1, row) = str2double(line_spl(5));
-        time_sect_unr(1, row) = str2double(line_spl(9)); 
-        entrances_phase_unr(1, row) = str2double(line_spl(13));
+        subj.diamants_unr(1, row) = str2double(line_spl(5));
+        subj.time_sect_unr(1, row) = str2double(line_spl(9)); 
+        subj.entrances_phase_unr(1, row) = str2double(line_spl(13));
         phase = phase + 1;
     end
 end
@@ -371,17 +394,15 @@ end
         
 
 %% GENERATE FORBIDDEN SECTOR DATA
-room_ent_x = [0 0 0 0]; room_ent_y = [0 0 0 0]; arena_ent_x = [0 0 0 0]; arena_ent_y = [0 0 0 0];
-distance = [-1 -1 -1 -1];
-entrances = [-1 -1 -1 -1];
-ent_first = [-1 -1 -1 -1];
-time_sect = [-1 -1 -1 -1];
-dist_sect = [-1 -1 -1 -1];
+
+room_ent_x = [0 0 0 0]; room_ent_y = [0 0 0 0]; 
+arena_ent_x = [0 0 0 0]; arena_ent_y = [0 0 0 0];
+ent_len = [0, 0, 0, 0];
+
 for phase = 1:4
     if f_len(phase) > 0
-    
-    [distance(phase), entrances(phase), entrances_index, time_sect(phase), dist_sect(phase),...
-            ent_first(phase), room_entX, room_entY, arena_entX,...
+    [subj.distance(phase), subj.entrances(phase), ~, subj.time_sect(phase), subj.dist_sect(phase),...
+            subj.ent_first(phase), room_entX, room_entY, arena_entX,...
             arena_entY] = output(time(:,phase), f_len(phase), room_x(:,phase), room_y(:,phase), arena_x(:,phase), arena_y(:,phase), phase);
         ent_len(phase) = length(room_entX);
 
@@ -394,6 +415,7 @@ for phase = 1:4
     end    
 end
 
+
 %% CREATE FIGURES
 
 set(0,'DefaultLineMarkerSize',3);%ma byt 3
@@ -405,12 +427,12 @@ for phase = 1:4
         
     create_fig_double (file_name, phase, room_x(1:f_len(phase),phase), room_y(1:f_len(phase),phase),...
         arena_x(1:f_len(phase),phase), arena_y(1:f_len(phase),phase), room_ent_x(1:ent_len(phase),phase), room_ent_y(1:ent_len(phase),phase),...
-        arena_ent_x(1:ent_len(phase),phase), arena_ent_y(1:ent_len(phase),phase), diam_pol_x(1:diamants(phase),phase),...
-        diam_pol_y(1:diamants(phase),phase), diam_pol_x_arena(1:diamants(phase),phase), diam_pol_y_arena(1:diamants(phase),phase),...
+        arena_ent_x(1:ent_len(phase),phase), arena_ent_y(1:ent_len(phase),phase), diam_pol_x(1:subj.diamants(phase),phase),...
+        diam_pol_y(1:subj.diamants(phase),phase), diam_pol_x_arena(1:subj.diamants(phase),phase), diam_pol_y_arena(1:subj.diamants(phase),phase),...
         view_room_x(1:f_len(phase),phase), view_room_y(1:f_len(phase),phase), view_arena_x(1:f_len(phase),phase),...
-        view_arena_y(1:f_len(phase),phase), ent_pol_x(1:entrances_unr(phase),phase), ent_pol_y(1:entrances_unr(phase),phase),...
-        exit_pol_x(1:entrances_unr(phase),phase), exit_pol_y(1:entrances_unr(phase),phase), ent_pol_x_arena(1:entrances_unr(phase),phase),...
-        ent_pol_y_arena(1:entrances_unr(phase),phase), exit_pol_x_arena(1:entrances_unr(phase),phase), exit_pol_y_arena(1:entrances_unr(phase),phase))
+        view_arena_y(1:f_len(phase),phase), ent_pol_x(1:subj.entrances_unr(phase),phase), ent_pol_y(1:subj.entrances_unr(phase),phase),...
+        exit_pol_x(1:subj.entrances_unr(phase),phase), exit_pol_y(1:subj.entrances_unr(phase),phase), ent_pol_x_arena(1:subj.entrances_unr(phase),phase),...
+        ent_pol_y_arena(1:subj.entrances_unr(phase),phase), exit_pol_x_arena(1:subj.entrances_unr(phase),phase), exit_pol_y_arena(1:subj.entrances_unr(phase),phase))
         
     % save figures 
     plot_fname = erase(file_name, '.log');
@@ -434,11 +456,6 @@ if closefig
 else
     fh = figure('visible','on');
 end
-x0=100;
-y0=50;
-width=550;
-height=450;
-%set(gcf,'units','points','position',[x0,y0,width,height]);
 set(gcf,'units','normalized','outerposition',[0 0 1 1]);
 subp_top = 0;
 subp_bot = 4;
@@ -464,25 +481,26 @@ for phase = 1:4
         end
     
         % plot entrances from unreal
-        if length(ent_pol_x) > 0
-            scatter(ent_pol_x(1:entrances_unr(phase),phase), ent_pol_y(1:entrances_unr(phase),phase), 10, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+        
+        if ~isempty(ent_pol_x)
+            scatter(ent_pol_x(1:subj.entrances_unr(phase),phase), ent_pol_y(1:subj.entrances_unr(phase),phase), 10, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
         end
-    
+        
         % plot sector exit from unreal
-        if length(exit_pol_x) > 0
-            scatter(exit_pol_x(1:entrances_unr(phase),phase), exit_pol_y(1:entrances_unr(phase),phase), 10, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+        if ~isempty(exit_pol_x)
+            scatter(exit_pol_x(1:subj.entrances_unr(phase),phase), exit_pol_y(1:subj.entrances_unr(phase),phase), 10, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
         end
 
         % plot entrances
-         if length(room_ent_x) > 0
+        if ~isempty(room_ent_x)
             if ((room_ent_x(1)) ~= 0) && (length(room_ent_x) ~= 1)
                 scatter(room_ent_x(1:ent_len(phase),phase), room_ent_y(1:ent_len(phase),phase), 5, 'r', 'filled', 'linewidth' , 0.8);
             end
          end
     
         % plot diamant entrances
-        if length(diam_pol_x) > 0
-            scatter(diam_pol_x(1:diamants(phase),phase), diam_pol_y(1:diamants(phase),phase), 13, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+        if ~isempty(diam_pol_x)
+            scatter(diam_pol_x(1:subj.diamants(phase),phase), diam_pol_y(1:subj.diamants(phase),phase), 13, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
         end
     
         % plot begging of track
@@ -536,25 +554,25 @@ for phase = 1:4
         end
     
         % plot entrances from unreal
-        if length(ent_pol_x_arena) > 0
-            scatter(ent_pol_x_arena(1:entrances_unr(phase),phase), ent_pol_y_arena(1:entrances_unr(phase),phase), 10, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+        if ~isempty(ent_pol_x_arena)
+            scatter(ent_pol_x_arena(1:subj.entrances_unr(phase),phase), ent_pol_y_arena(1:subj.entrances_unr(phase),phase), 10, 'y', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
         end
     
         % plot sector exit from unreal
-        if length(exit_pol_x_arena) > 0
-            scatter(exit_pol_x_arena(1:entrances_unr(phase),phase), exit_pol_y_arena(1:entrances_unr(phase),phase), 10, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
+        if ~isempty(exit_pol_x_arena)
+            scatter(exit_pol_x_arena(1:subj.entrances_unr(phase),phase), exit_pol_y_arena(1:subj.entrances_unr(phase),phase), 10, 'g', 'filled', 'linewidth' , 0.8, 'MarkerEdgeColor',[0 .5 .5]);
         end
 
         % plot entrances
-        if length(arena_ent_x) > 0
+        if ~isempty(arena_ent_x)
             if ((arena_ent_x(1)) ~= 0) && (length(arena_ent_x) ~= 1)
                 scatter(arena_ent_x(1:ent_len(phase),phase), arena_ent_y(1:ent_len(phase),phase), 5, 'r', 'filled', 'linewidth' , 0.8);
             end
         end
     
         % plot diamant entrances
-        if length(diam_pol_x_arena) > 0
-            scatter(diam_pol_x_arena(1:diamants(phase),phase), diam_pol_y_arena(1:diamants(phase),phase), 13, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
+        if ~isempty(diam_pol_x_arena)
+            scatter(diam_pol_x_arena(1:subj.diamants(phase),phase), diam_pol_y_arena(1:subj.diamants(phase),phase), 13, 'd', 'filled', 'b', 'MarkerEdgeColor',[0 .5 .5]);
         end
     
         % plot begging of track
@@ -597,6 +615,5 @@ file_name_fig = strcat(filepath,'\figures\',file_name,'.jpg'); %obrazek ulozim s
 saveas(gcf, file_name_fig); 
 if closefig, close(fh); end
 
-%% OUTPUT DATA
-output_data = [distance, entrances, entrances_unr, entrances_phase_unr, ent_first, time_sect, time_sect_unr, dist_sect, diamants, diamants_unr];
-fprintf(' ... file OK \n'); 
+%% FILE ANALYZED
+fprintf(' ... file processed \n'); 
