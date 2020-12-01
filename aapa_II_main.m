@@ -1,17 +1,29 @@
 function [data_table, data, ent_to_file, diam_to_file, histogram_room, histogram_arena] = aapa_II_main(folder,closefig, nbins)
 % view readme.txt for more info on ouput
 
+% set path to used functions in src folder
+currentFolder = pwd;
+addpath([currentFolder, '\src\']);
+
+% turn off warning for adding new sheets
+warning('off', 'MATLAB:xlswrite:AddSheet');
+
+
+% define default function values
 if ~exist('closefig','var')
     closefig = 1; 
 end %defaultne se NEzaviraji obrazky po ulozeni
+
 if ~exist('folder','var') %pokud uz nemam folder - Kamil
 % get folder name with input data files
     folder_input = uigetdir;
     folder = strcat(folder_input, '\');
 end
+
 if ~exist('nbins','var') %default bins for histogram = 15x15
     nbins = [15, 15];
 end
+
 
 % list _T.log files from input directory
 files = dir(fullfile(folder, '*_T.log'));
@@ -124,16 +136,14 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
     'DistInSectF0', 'DistInSectF1', 'DistInSectF2', 'DistInSectF3', ...
     'DiamantF0', 'DiamantF1', 'DiamantF2', 'DiamantF3', ...
     'DiamantUnrF0', 'DiamantUnrF1', 'DiamantUnrF2', 'DiamantUnrF3'};
-    
-    % create folder for output csv files    
-    if exist([folder, '\results\'],'dir') ~= 7 %check if file exists
-        mkdir([folder, '\results']);
-    end
+
 
     data_table = cell2table(data, 'VariableNames', var_names);
-    filename = sprintf('results_%s.csv', datestr(now,'mm-dd-yyyy HH-MM'));
-    writetable(data_table,[[folder, '\results\'], filename]);
+    filename = sprintf('output_data_%s.xlsx', datestr(now,'mm-dd-yyyy HH-MM'));
+    out_data = [folder, filename];
+    writetable(data_table, out_data, 'Sheet', 'results');
     
+
     % create output table for entrances and write to file
     ent_to_file = cell(length(filenames_ent_out), 4);
     for rows = 1: length(filenames_ent_out)
@@ -145,8 +155,7 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
   
     var_names_ent = {'Filename', 'Phase', 'Ent_time', 'Ent_dur'};
     ent_table = cell2table(ent_to_file, 'VariableNames', var_names_ent);
-    filename = sprintf('entrances_%s.csv', datestr(now,'mm-dd-yyyy HH-MM'));
-    writetable(ent_table,[[folder, '\results\'], filename]);
+    writetable(ent_table, out_data, 'Sheet', 'entrances');
     
     % create output table for diamants and write to file
     diam_to_file = cell(length(filenames_diam_out), 3);
@@ -157,9 +166,8 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
     end
 
     var_names_diam = {'Filename', 'Phase', 'Diam_time'};
-    ent_table = cell2table(diam_to_file, 'VariableNames', var_names_diam);
-    filename = sprintf('diamant_%s.csv', datestr(now,'mm-dd-yyyy HH-MM'));
-    writetable(ent_table,[[folder, '\results\'], filename]);
+    diam_table = cell2table(diam_to_file, 'VariableNames', var_names_diam);
+    writetable(diam_table, out_data, 'Sheet', 'diamants');
 
 
     % create histogram and save data to output and csv
@@ -217,13 +225,13 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
                 if rows == 1
                     histogram_room{rows, 1} = 'Phase 0';
                     histogram_arena{rows, 1} = 'Phase 0';
-                 elseif rows == nbins(1)
+                 elseif rows == nbins(1) + 1
                     histogram_room{rows, 1} = 'Phase 1';
                     histogram_arena{rows, 1} = 'Phase 1';
-                elseif rows == nbins(1)*2
+                elseif rows == nbins(1)*2 + 1
                     histogram_room{rows, 1} = 'Phase 2';
                     histogram_arena{rows, 1} = 'Phase 2';
-                elseif rows == nbins(1)*3
+                elseif rows == nbins(1)*3 + 1
                     histogram_room{rows, 1} = 'Phase 3';
                     histogram_arena{rows, 1} = 'Phase 3';
                 end
@@ -232,12 +240,14 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
 
     % write room histogram to file
     hist_table = cell2table(histogram_room);
-    filename = sprintf('histogram_room_%s.csv', datestr(now,'mm-dd-yyyy HH-MM'));
-    writetable(hist_table,[[folder, '\results\'], filename]);
+    writetable(hist_table, out_data, 'Sheet', 'hist_room');
     % write arena histogram to file
     hist_table = cell2table(histogram_arena);
-    filename = sprintf('histogram_arena_%s.csv', datestr(now,'mm-dd-yyyy HH-MM'));
-    writetable(hist_table,[[folder, '\results\'], filename]);
+    writetable(hist_table, out_data, 'Sheet', 'hist_arena');
+    
+    
+    % delete blank sheets in output.xls file
+    % possibly to add in the future
 
 
     % display analysis results

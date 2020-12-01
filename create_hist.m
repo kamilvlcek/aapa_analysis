@@ -7,10 +7,19 @@ else
 end
 
 % create histogram
+if closefig
+    fh = figure('visible','off');
+else
+    fh = figure('visible','on');
+end
+
+% create histogram
 figure(fh)
 hist3 (data, 'CdataMode','auto', 'Nbins', nbins);
 xlabel('X')
 ylabel('Y')
+xlim([-1000 1000]);
+ylim([-1000 1000]);
 title(['Histogram F', num2str(phase-1),' ', frame])
 colorbar
 view(2)

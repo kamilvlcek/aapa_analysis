@@ -171,9 +171,10 @@ end
 view_len = 65;
 view_room_x = [0 0 0 0]; view_room_y = [0 0 0 0];
 view_arena_x = [0 0 0 0]; view_arena_y = [0 0 0 0];
-rot_speed = 15; % 15 stupnov/s
+rot_speed = 0.06; % 6 stupnov/s =  /100ms
 gen_sect = 1;
 ang = 151.3972930908203;
+angle_not_set = 1;
 
 for phase = 1:4
     
@@ -182,20 +183,32 @@ for phase = 1:4
         for i=1:f_len(phase)
             % if file doesn't have angle info
             if angle == -1
-                ang = ang + 15;
+                ang = ang + rot_speed;
                 if ang > 359.9
                     ang = mod(ang,360);
                 end
                 
-            % angle to 0-360    
+                
             else
+                                
+                % angle to 0-360    
                 if angle(i,phase) < 0
                     ang = angle(i,phase)+ 360;
                 else
                     ang = angle(i,phase);
                 end
+                
+                % normalize the angle, always start from 0°
+                if angle_not_set
+                    start_angle = ang;
+                    angle_not_set = 0;
+                end
+                if ang < start_angle
+                    ang = (ang-start_angle) + 360;
+                else
+                    ang = ang-start_angle;
+                end
             end
-            
             
             % create arena coordinated by rotating room
             [arena_x(i,phase), arena_y(i,phase)] = rotate(room_x(i,phase), room_y(i,phase), ang*-1);
@@ -493,7 +506,7 @@ for phase = 1:4
 
         % plot entrances
         if ~isempty(room_ent_x)
-            if ((room_ent_x(1)) ~= 0) && (length(room_ent_x) ~= 1)
+            if ((room_ent_x(1, phase)) ~= 0) && (length(room_ent_x) ~= 1)
                 scatter(room_ent_x(1:ent_len(phase),phase), room_ent_y(1:ent_len(phase),phase), 5, 'r', 'filled', 'linewidth' , 0.8);
             end
          end
@@ -565,7 +578,7 @@ for phase = 1:4
 
         % plot entrances
         if ~isempty(arena_ent_x)
-            if ((arena_ent_x(1)) ~= 0) && (length(arena_ent_x) ~= 1)
+            if ((arena_ent_x(1, phase)) ~= 0) && (length(arena_ent_x) ~= 1)
                 scatter(arena_ent_x(1:ent_len(phase),phase), arena_ent_y(1:ent_len(phase),phase), 5, 'r', 'filled', 'linewidth' , 0.8);
             end
         end
