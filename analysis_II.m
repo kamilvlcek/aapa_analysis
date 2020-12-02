@@ -24,30 +24,17 @@ file_name_events = erase(file_name_full, '_T');
 % create file name for figs and saving
 [filepath, file_name,~] = fileparts(file_name_events);
 
-% check for existence
-if ~exist(file_name_events, 'file')
-    line = strcat('Missing event file: ', file_name);
-    disp(line);
-    return
-end
-
-
 % CREATE OBJECTS FOR STORING RESULTS
+%the variables should be inicialized here, before the return due to missing event file 
 subj = SubjectResults;
 diamTimes = SubjectTimes;
 entTimes = SubjectTimes;
 entDur = SubjectTimes;
-
-
-%% LOAD DATA 
-data_file = fopen(file_name_full);
-
 file_set = 0;
-phase = 1; last_phase = 1;
+last_phase = 1; phase = 1; 
 beg_count = 1;
 row_pl = 1; row_ps = 1; row_an = 1;
-room_x = [0 0 0 0]; room_y = [0 0 0 0];
-arena_x = [0 0 0 0]; arena_y = [0 0 0 0];
+
 view = [0 0 0 0];
 f_len = [0 0 0 0];
 time = [0 0 0 0];
@@ -55,6 +42,24 @@ file_rot = 'empty'; file_loc = 'empty';
 time_temp = 0;
 time_change = 0;
 time_of_change = -1;
+room_x = [0 0 0 0]; room_y = [0 0 0 0];
+arena_x = [0 0 0 0]; arena_y = [0 0 0 0];
+
+% check for existence of event file
+if ~exist(file_name_events, 'file')
+    line = strcat('Missing event file: ', file_name);
+    disp(line); 
+    return;
+end
+
+
+
+
+
+%% LOAD DATA 
+data_file = fopen(file_name_full);
+
+
 
 % LOAD XY ROOM COORDINATES AND ARENA ANGLE
 while 1
