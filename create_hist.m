@@ -30,6 +30,7 @@ if exist([folder, '\histogram\'],'dir') ~= 7 %check if file exists
 end
 file_name = strcat(folder,'\histogram\','hist_f', num2str(phase-1),'_', frame, '.jpg');
 saveas(gcf, file_name);
+disp(['histogram saved to ' file_name ]);
 if closefig, close(fh); end
 
 % generate histogram table and save to file

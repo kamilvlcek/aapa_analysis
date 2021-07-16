@@ -29,7 +29,7 @@ end
 files = dir(fullfile(folder, '*_T.log'));
 
 % create out cell array 1st row
-data = cell(1, 42);
+data = cell(1, 44);
 
 % create matrix to store coordinates for histogram
 f1_x_room= []; f1_y_room= []; f2_x_room= []; f2_y_room= [];
@@ -42,21 +42,26 @@ ent_out = [];
 filenames_ent_out = [];
 diam_out = [];
 filenames_diam_out = [];
-
+batchtimer=tic; %start timer  %kamil 14.7.2021
+disp(datetime('now')); %print current time %kamil 14.7.2021
 % process data files
 for i = 1:length(files)
-    fprintf('file %i/%i  %s ', i, numel(files), files(i).name); %pro vice souboru je trosku videt, v jake fazi zpracovani to je - Kamil
+    cas = toc(batchtimer); %time until now in seconds %kamil 14.7.2021
+    odhadcelehocasu = length(files)/i * cas; %estimated total time %kamil 14.7.2021
+    fprintf('file %i/%i, %.1f/%.1f min  %s ', i, numel(files), cas/60, odhadcelehocasu/60, files(i).name); %pro vice souboru je trosku videt, v jake fazi zpracovani to je - Kamil
     file_name = strcat(folder, files(i).name);
     [subj, diamTimes, entTimes, entDur, room_x, room_y, arena_x, arena_y, f_len] = analysis_II(file_name,closefig);
     
     %save output to cell array
     subj_name = erase(files(i).name, '_T.log');
-    data{i,1} = subj_name;
-    data{i,2} = subj.status;
+    data{i,1} = i; %kamil 14.7.2021
+    data{i,2} = ['''' subj_name ];
+    data{i,3} = subj.status;
+    data{i,4} = subj.error_msg; %kamil 14.7.2021
     props = properties(subj);
     
-    l = 3; %cycle trhough properties from prop no3
-    for j = 2:length(props)
+    l = 5; %cycle trhough properties from prop no3
+    for j = 3:length(props)
         thisprop = props{j};
         for k = 1:4
             data{i,l} = subj.(thisprop)(k);
@@ -126,7 +131,7 @@ for i = 1:length(files)
 end
 
 % create result table and write to file
-var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','DistanceF3', ... 
+var_names = {'No','Filename', 'Status','error_msg','DistanceF0','DistanceF1','DistanceF2','DistanceF3', ... 
     'EntrancesF0', 'EntrancesF1', 'EntrancesF2', 'EntrancesF3', ...
     'EntrancesUnrF0', 'EntrancesUnrF1', 'EntrancesUnrF2', 'EntrancesUnrF3', ...
     'EntrancesUnrFileF0', 'EntrancesUnrFileF1', 'EntrancesUnrFileF2','EntrancesUnrFileF3', ...
@@ -142,12 +147,12 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
     filename = sprintf('output_data_%s.xlsx', datestr(now,'mm-dd-yyyy HH-MM'));
     out_data = [folder, filename];
     writetable(data_table, out_data, 'Sheet', 'results');
-    
+    disp(['summary results written to ' filename ', sheet results']);      %kamil 14.7.2021
 
     % create output table for entrances and write to file
     ent_to_file = cell(length(filenames_ent_out), 4);
     for rows = 1: length(filenames_ent_out)
-        ent_to_file{rows, 1} = filenames_ent_out(rows, :);
+        ent_to_file{rows, 1} = ['''' filenames_ent_out(rows, :)];
         ent_to_file{rows, 2} = ent_out(rows, 1)-1; % number of phases starts from 0
         ent_to_file{rows, 3} = ent_out(rows, 2);
         ent_to_file{rows, 4} = ent_out(rows, 3);
@@ -156,11 +161,12 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
     var_names_ent = {'Filename', 'Phase', 'Ent_time', 'Ent_dur'};
     ent_table = cell2table(ent_to_file, 'VariableNames', var_names_ent);
     writetable(ent_table, out_data, 'Sheet', 'entrances');
+    disp(['list of entraces to avoidance area written to ' filename ', sheet entrances']);  %kamil 14.7.2021
     
     % create output table for diamants and write to file
     diam_to_file = cell(length(filenames_diam_out), 3);
     for rows = 1: length(filenames_diam_out)
-        diam_to_file{rows, 1} = filenames_diam_out(rows, :);
+        diam_to_file{rows, 1} = ['''' filenames_diam_out(rows, :)];
         diam_to_file{rows, 2} = diam_out(rows, 1)-1; % number of phases starts from 0
         diam_to_file{rows, 3} = diam_out(rows, 2);
     end
@@ -168,7 +174,7 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
     var_names_diam = {'Filename', 'Phase', 'Diam_time'};
     diam_table = cell2table(diam_to_file, 'VariableNames', var_names_diam);
     writetable(diam_table, out_data, 'Sheet', 'diamants');
-
+    disp(['list of entraces to diamants written to ' filename ', sheet diamants']);  %kamil 14.7.2021
 
     % create histogram and save data to output and csv
     histogram_room = cell(nbins(1)*4, nbins(2)+1);
@@ -244,7 +250,7 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
     % write arena histogram to file
     hist_table = cell2table(histogram_arena);
     writetable(hist_table, out_data, 'Sheet', 'hist_arena');
-    
+    disp(['histogram data written to ' filename ', sheets hist_room and hist_arena']); %kamil 14.7.2021
     
     % delete blank sheets in output.xls file
     % possibly to add in the future
@@ -252,6 +258,7 @@ var_names = {'Filename', 'Status','DistanceF0','DistanceF1','DistanceF2','Distan
 
     % display analysis results
     disp ('Status: "File OK" = file processed; "INC, processed" = file incomplete, but processed; "NOT processed" = file too short, not processed');
+    disp(datetime('now')); %print current time %kamil 14.7.2021
     disp('Analysis done.');
 
 end

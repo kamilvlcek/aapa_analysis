@@ -47,8 +47,9 @@ arena_x = [0 0 0 0]; arena_y = [0 0 0 0];
 
 % check for existence of event file
 if ~exist(file_name_events, 'file')
-    line = strcat('Missing event file: ', file_name);
-    disp(line); 
+    subj.error_msg = strcat('Missing event file: ', file_name, 's, file NOT processed');
+    subj.status = 'NOT processed';
+    disp(subj.error_msg);  
     return;
 end
 
@@ -64,8 +65,7 @@ data_file = fopen(file_name_full);
 % LOAD XY ROOM COORDINATES AND ARENA ANGLE
 while 1
   
-    line = fgetl(data_file); % get line
-    
+    line = fgetl(data_file); % get line    
     if feof(data_file)||contains (line, 'Experiment ended')
         
         % throw error message if file not complete
@@ -73,15 +73,14 @@ while 1
             time_num_str = string(time_now);
             
             if time_now < min_length
-                error_msg = strcat(' ... incomplete, time: ', time_num_str, 's, file NOT processed');
+                subj.error_msg = strcat(' ... incomplete, time: ', time_num_str, 's, file NOT processed');
                 subj.status = 'NOT processed';
-                disp(error_msg);
-                return
-            
+                disp(subj.error_msg);                
+                return            
             else
-                error_msg = strcat(' ... incomplete, time: ', time_num_str, 's, processing file');
+                subj.error_msg = strcat(' ... incomplete, time: ', time_num_str, 's, processing file');
                 subj.status = 'INC, processed';
-                disp(error_msg);
+                fprintf(subj.error_msg); %to not print end of line - kamil 14.7.2021
             end
         end
         break;

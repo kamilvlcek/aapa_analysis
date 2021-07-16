@@ -1,6 +1,7 @@
 classdef SubjectResults
    properties
        status = 'File OK'
+       error_msg = 'no error'
        distance = [-1 -1 -1 -1]
        entrances = [-1 -1 -1 -1]
        entrances_unr = [-1 -1 -1 -1]
